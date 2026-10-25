@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TopoTerra Civil Studio — Dashboard de Topografía y Movimiento de Suelos</title>
+  <meta name="description" content="Software profesional de ingeniería civil para cubicación de terrenos, cálculo de volúmenes de corte y relleno, análisis de perfiles y balance de masas. Inspirado en Pix4Dmapper.">
+
+  <!-- Estilos del Sistema de Diseño -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Librerías Vendor Locales (100% Offline y Confiable) -->
+  <script src="vendor/chart.umd.min.js"></script>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/OrbitControls.js"></script>
+  <script src="vendor/papaparse.min.js"></script>
+  <script src="vendor/jspdf.umd.min.js"></script>
+  <script src="vendor/html2canvas.min.js"></script>
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- BARRA LATERAL (SIDEBAR) -->
+  <aside class="sidebar" id="app-sidebar">
+    <div class="sidebar-header">
+      <div class="brand-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+          <line x1="8" y1="2" x2="8" y2="18"></line>
+          <line x1="16" y1="6" x2="16" y2="22"></line>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>TopoTerra <span>PRO</span></h1>
+        <p>Civil & Earthwork Studio</p>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Análisis y Cubicaciones</div>
+      <button class="nav-item active" data-tab="resumen" id="nav-btn-resumen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span>Resumen General</span>
+      </button>
+
+      <button class="nav-item" data-tab="calculadora" id="nav-btn-calc">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+          <line x1="8" y1="6" x2="16" y2="6"></line>
+          <line x1="16" y1="14" x2="16" y2="18"></line>
+          <path d="M16 10h.01"></path>
+          <path d="M12 10h.01"></path>
+          <path d="M8 10h.01"></path>
+          <path d="M12 14h.01"></path>
+          <path d="M8 14h.01"></path>
+          <path d="M12 18h.01"></path>
+          <path d="M8 18h.01"></path>
+        </svg>
+        <span>Calculadora de Suelos</span>
+        <span class="nav-badge" id="badge-calc-mode">Malla</span>
+      </button>
+
+      <button class="nav-item" data-tab="visualizador" id="nav-btn-vis">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+        <span>Visualizador 2D / 3D</span>
+      </button>
+
+      <button class="nav-item" data-tab="analisis" id="nav-btn-analisis">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        <span>Perfiles y Gráficos</span>
+      </button>
+
+      <button class="nav-item" data-tab="escenarios" id="nav-btn-escenarios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+        <span>Escenarios de Rasante</span>
+      </button>
+
+      <div class="nav-section-title">Gestión y Documentación</div>
+      <button class="nav-item" data-tab="proyectos" id="nav-btn-proyectos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span>Gestor de Proyectos</span>
+      </button>
+
+      <button class="nav-item" data-tab="informes" id="nav-btn-informes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <span>Memoria Técnica (PDF)</span>
+      </button>
+
+      <button class="nav-item" data-tab="tests" id="nav-btn-tests">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <span>Verificación y Tests</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle-btn" id="btn-toggle-theme">
+        <span>Modo Oscuro / Claro</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+
+      <div class="academic-chip">
+        <strong>UTN FRC — Ing. Civil</strong><br>
+        Fundamentos de Informática 2026<br>
+        <span style="font-size: 10px; opacity: 0.8;">Graiff | Paredes | Broggi</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <main class="main-wrapper">
+    <!-- BARRA SUPERIOR (HEADER) -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="project-selector">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <select id="select-active-project" title="Seleccionar proyecto activo"></select>
+        </div>
+        <span class="mode-badge advanced" id="topbar-mode-badge" title="Clic para alternar Modo Malla / Modo Simple">Modo Malla Avanzada</span>
+      </div>
+
+      <div class="topbar-right">
+        <div class="balance-pill surplus" id="topbar-balance-pill">
+          <span id="topbar-balance-text">Balance: +0.0 m³</span>
+        </div>
+
+        <button class="btn btn-secondary btn-sm" id="btn-quick-new-proj">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Nuevo</span>
+        </button>
+
+        <button class="btn btn-outline btn-sm" id="btn-restore-defaults" title="Restaurar ejemplos originales">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          <span>Ejemplo</span>
+        </button>
+
+        <button class="btn btn-primary btn-sm" id="btn-quick-print">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>Imprimir Informe</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ÁREA DE VISTAS DINÁMICAS -->
+    <div class="content-area">
+
+      <!-- ================= 1. VISTA: RESUMEN GENERAL ================= -->
+      <section class="view-section active" id="view-resumen">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title" id="resumen-proj-name">Cargando proyecto...</h2>
+            <p class="page-subtitle" id="resumen-proj-desc">Cálculo de movimiento de tierras y balance volumétrico</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" id="btn-resumen-edit-data">
+              Editar Datos
+            </button>
+            <button class="btn btn-primary btn-sm" id="btn-resumen-open-3d">
+              Abrir Visor 3D
+            </button>
+          </div>
+        </div>
+
+        <!-- Tarjetas KPI Principales -->
+        <div class="kpi-grid">
+          <!-- Volumen de Corte -->
+          <div class="kpi-card kpi-cut">
+            <div class="kpi-header">
+              <span class="kpi-label">Volumen de Corte (Desmonte)</span>
+              <div class="kpi-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M2 20h20"></path>
+                  <path d="m5 16 7-7 5 5"></path>
+                  <path d="m14 7 3-3"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value">
+              <span id="kpi-cut-vol">0.0</span>
+              <span class="kpi-unit">m³</span>
+            </div>
+            <div class="kpi-footer">
+              <span>Área: <strong id="kpi-cut-area">0 m²</strong></span>
+              <span>Prof. Media: <strong id="kpi-cut-depth">0.00 m</strong></span>
+            </div>
+          </div>
+
+          <!-- Volumen de Relleno -->
+          <div class="kpi-card kpi-fill">
+            <div class="kpi-header">
+              <span class="kpi-label">Volumen de Relleno (Terraplén)</span>
+              <div class="kpi-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M2 20h20"></path>
+                  <path d="m5 16 7 4 8-8"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value">
+              <span id="kpi-fill-vol">0.0</span>
+              <span class="kpi-unit">m³</span>
+            </div>
+            <div class="kpi-footer">
+              <span>Área: <strong id="kpi-fill-area">0 m²</strong></span>
+              <span>Alt. Media: <strong id="kpi-fill-height">0.00 m</strong></span>
+            </div>
+          </div>
+
+          <!-- Balance Neto -->
+          <div class="kpi-card kpi-balance">
+            <div class="kpi-header">
+              <span class="kpi-label">Balance Neto de Masas</span>
+              <div class="kpi-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="8" y1="12" x2="16" y2="12"></line>
+                  <line x1="12" y1="8" x2="12" y2="16"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value">
+              <span id="kpi-net-balance">0.0</span>
+              <span class="kpi-unit">m³</span>
+            </div>
+            <div class="kpi-footer">
+              <span id="kpi-balance-status">Compensado</span>
+              <span>Diferencia: <strong id="kpi-pct-diff">0%</strong></span>
+            </div>
+          </div>
+
+          <!-- Movimiento Total -->
+          <div class="kpi-card kpi-total">
+            <div class="kpi-header">
+              <span class="kpi-label">Movimiento Total de Tierras</span>
+              <div class="kpi-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="1" y="3" width="15" height="13"></rect>
+                  <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                  <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                  <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value">
+              <span id="kpi-total-vol">0.0</span>
+              <span class="kpi-unit">m³</span>
+            </div>
+            <div class="kpi-footer">
+              <span>Superficie: <strong id="kpi-surface-area">0 m²</strong></span>
+              <span>Camiones: <strong id="kpi-trucks">0 vjes</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráfico y Resumen Técnico -->
+        <div class="grid-2col">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M12 2a10 10 0 0 1 10 10"></path>
+                </svg>
+                Proporción Volumétrica Corte vs Relleno
+              </h3>
+            </div>
+            <div class="chart-box" style="height: 260px;">
+              <canvas id="chart-volume-doughnut"></canvas>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                  <polyline points="2 17 12 22 22 17"></polyline>
+                  <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+                Parámetros y Metodología Aplicada
+              </h3>
+              <span class="table-badge balance" id="resumen-method-badge">Método de Prismas</span>
+            </div>
+            <div style="font-size: 13px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 10px;">
+              <p id="resumen-method-desc">
+                Cálculo riguroso celda por celda mediante descomposición en sub-prismas triangulares (TIN local) con interpolación de la línea de paso de cota roja cero. Evita la cancelación artificial de volúmenes en celdas mixtas.
+              </p>
+              <div style="background: var(--bg-tertiary); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-card);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                  <span>Puntos / Nodos analizados:</span>
+                  <strong id="resumen-total-points" class="font-mono text-primary">0</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                  <span>Cota Mínima / Máxima Terreno:</span>
+                  <strong id="resumen-elev-range" class="font-mono text-primary">0 - 0 m</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                  <span>Esponjamiento / Compactación:</span>
+                  <strong id="resumen-factors" class="font-mono text-primary">+15% / +10%</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Escenario de Rasante Activo:</span>
+                  <strong id="resumen-active-scenario" style="color: var(--color-accent);">Rasante Base</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 2. VISTA: CALCULADORA DE MOVIMIENTO DE SUELOS ================= -->
+      <section class="view-section" id="view-calculadora">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Calculadora de Movimiento de Suelos</h2>
+            <p class="page-subtitle">Configuración de parámetros, edición de puntos topográficos y cálculo de cotas rojas</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <div class="btn-group" style="display: flex; border: 1px solid var(--border-card); border-radius: var(--radius-md); overflow: hidden;">
+              <button class="btn btn-secondary btn-sm" id="calc-switch-advanced" style="border-radius: 0;">Modo Avanzado (Malla)</button>
+              <button class="btn btn-outline btn-sm" id="calc-switch-simple" style="border-radius: 0;">Modo Simple (Uniforme)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL MODO SIMPLE -->
+        <div id="panel-calc-simple" style="display: none;">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Parámetros de Superficie Uniforme</h3>
+              <span class="table-badge fill">Estimación Preliminar</span>
+            </div>
+            <div class="grid-3col">
+              <div class="form-group">
+                <label class="form-label">Superficie del Terreno (Área)</label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-input" id="input-simple-area" value="1250" step="10" min="1">
+                  <span class="input-unit">m²</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Cota Media Terreno Natural (Znat)</label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-input" id="input-simple-znat" value="102.40" step="0.1">
+                  <span class="input-unit">m</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Cota Rasante de Proyecto (Zproj)</label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-input" id="input-simple-zproj" value="101.60" step="0.1">
+                  <span class="input-unit">m</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Factor de Esponjamiento (Corte)</label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-input" id="input-simple-bulking" value="15" step="1" min="0">
+                  <span class="input-unit">%</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Factor de Compactación (Relleno)</label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-input" id="input-simple-shrinkage" value="10" step="1" min="0">
+                  <span class="input-unit">%</span>
+                </div>
+              </div>
+              <div class="form-group" style="display: flex; align-items: flex-end;">
+                <button class="btn btn-primary" id="btn-calc-simple-apply" style="width: 100%;">
+                  Calcular Volúmenes
+                </button>
+              </div>
+            </div>
+            <div class="math-notes" style="margin-top: 10px;">
+              <strong>Advertencia de Ingeniería:</strong> El modo simple asume elevaciones horizontales constantes ($\Delta h = Z_{nat} - Z_{proj}$). Resulta útil para órdenes de magnitud o estimaciones preliminares de anteproyecto, pero no reemplaza un relevamiento topográfico planialtimétrico riguroso.
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL MODO AVANZADO -->
+        <div id="panel-calc-advanced">
+          <!-- Toolbar de Malla y Datos -->
+          <div class="card" style="padding: 16px;">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">Malla Actual:</span>
+                <span class="table-badge balance" id="calc-grid-size-label">11 x 11 puntos (5m x 5m)</span>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <button class="btn btn-secondary btn-sm" id="btn-open-csv-modal">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <span>Importar CSV</span>
+                </button>
+                <button class="btn btn-outline btn-sm" id="btn-download-csv-template">
+                  <span>Plantilla CSV</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" id="btn-gen-rolling">
+                  <span>Relieve Ondulado</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" id="btn-gen-slope">
+                  <span>Plataforma en Ladera</span>
+                </button>
+                <button class="btn btn-primary btn-sm" id="btn-auto-balance-grade">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2v20"></path>
+                    <path d="m17 5-5-3-5 3"></path>
+                  </svg>
+                  <span>Compensar Rasante Óptima</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabla de Puntos Topográficos -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                Nube de Puntos Topográficos Planialtimétricos
+              </h3>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="text" class="form-input" id="table-search-point" placeholder="Buscar ID de punto..." style="width: 180px; padding: 4px 8px; font-size: 12px;">
+                <span style="font-size: 12px; color: var(--text-muted);" id="table-count-label">Total: 121 puntos</span>
+              </div>
+            </div>
+            <div class="data-table-container" style="max-height: 420px; overflow-y: auto;">
+              <table class="data-table" id="points-table">
+                <thead>
+                  <tr>
+                    <th>ID Punto</th>
+                    <th>X (m)</th>
+                    <th>Y (m)</th>
+                    <th>Z Natural (m)</th>
+                    <th>Z Rasante (m)</th>
+                    <th>Cota Roja (Δh)</th>
+                    <th>Estado</th>
+                    <th style="text-align: right;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="points-table-body">
+                  <!-- Llenado dinámicamente por JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 3. VISTA: VISUALIZADOR 2D / 3D ================= -->
+      <section class="view-section" id="view-visualizador">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Visualizador Espacial del Terreno</h2>
+            <p class="page-subtitle">Mapa de calor planimétrico 2D e inspección tridimensional WebGL con Three.js</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <div class="btn-group" style="display: flex; border: 1px solid var(--border-card); border-radius: var(--radius-md); overflow: hidden;">
+              <button class="btn btn-secondary btn-sm" id="vis-tab-2d" style="border-radius: 0;">Vista en Planta 2D (Heatmap)</button>
+              <button class="btn btn-outline btn-sm" id="vis-tab-3d" style="border-radius: 0;">Modelo 3D Interactivo</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTENEDOR 2D -->
+        <div id="vis-container-2d">
+          <div class="viewer-container" id="container-canvas-2d">
+            <canvas id="canvas-terrain-2d"></canvas>
+            <div class="viewer-toolbar">
+              <button class="btn btn-secondary btn-sm" id="btn-2d-fit" title="Centrar y ajustar vista">Ajustar Vista</button>
+              <button class="btn btn-outline btn-sm" id="btn-2d-toggle-labels">Etiquetas Cotas</button>
+              <button class="btn btn-outline btn-sm" id="btn-2d-toggle-grid">Cuadrícula</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTENEDOR 3D -->
+        <div id="vis-container-3d" style="display: none;">
+          <div class="viewer-container" id="container-webgl-3d">
+            <!-- Three.js inyectará el canvas aquí -->
+            <div class="viewer-toolbar">
+              <button class="btn btn-secondary btn-sm" id="btn-3d-reset-cam">Restablecer Cámara</button>
+            </div>
+            <div class="viewer-controls-right">
+              <label>
+                <span>Exageración Vertical:</span>
+                <span id="label-exag-val" class="font-mono" style="font-weight: 700; color: var(--color-accent);">2.0x</span>
+              </label>
+              <input type="range" id="slider-vertical-exag" min="1.0" max="5.0" step="0.5" value="2.0">
+
+              <label style="margin-top: 6px;">
+                <span>Opacidad Rasante:</span>
+                <span id="label-opacity-val" class="font-mono">65%</span>
+              </label>
+              <input type="range" id="slider-grade-opacity" min="0.1" max="1.0" step="0.05" value="0.65">
+
+              <div style="border-top: 1px solid var(--border-subtle); margin-top: 8px; padding-top: 8px; display: flex; flex-direction: column; gap: 6px;">
+                <label>
+                  <input type="checkbox" id="check-show-terrain" checked> Terreno Natural
+                </label>
+                <label>
+                  <input type="checkbox" id="check-show-grade" checked> Rasante Proyectada
+                </label>
+                <label>
+                  <input type="checkbox" id="check-show-prisms" checked> Prismas Corte/Relleno
+                </label>
+                <label>
+                  <input type="checkbox" id="check-show-wireframe"> Modo Malla Alámbrica
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel de Inspección de Punto Seleccionado -->
+        <div class="card" style="margin-top: 20px;">
+          <div class="card-header">
+            <h3 class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              Ficha Técnica del Punto Seleccionado
+            </h3>
+            <span class="table-badge balance" id="selected-pt-status">Haga clic en un punto</span>
+          </div>
+          <div class="grid-3col" id="selected-pt-info" style="font-size: 13px;">
+            <div><strong>Identificador:</strong> <span id="info-pt-id" class="font-mono">-</span></div>
+            <div><strong>Coordenadas X / Y:</strong> <span id="info-pt-xy" class="font-mono">-</span></div>
+            <div><strong>Cota Terreno Natural:</strong> <span id="info-pt-znat" class="font-mono">-</span></div>
+            <div><strong>Cota Rasante de Proyecto:</strong> <span id="info-pt-zproj" class="font-mono">-</span></div>
+            <div><strong>Cota Roja (Δh):</strong> <span id="info-pt-delta" class="font-mono">-</span></div>
+            <div><strong>Operación Requerida:</strong> <span id="info-pt-action">-</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 4. VISTA: GRÁFICOS Y ANÁLISIS ================= -->
+      <section class="view-section" id="view-analisis">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Perfiles Altimétricos y Análisis de Distribución</h2>
+            <p class="page-subtitle">Perfiles longitudinales y transversales interactivos, histogramas de cota roja y rangos de desmonte</p>
+          </div>
+        </div>
+
+        <div class="grid-2col">
+          <!-- Perfil Longitudinal -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Perfil Longitudinal (Eje X)</h3>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-size: 12px; color: var(--text-secondary);">Fila:</label>
+                <select id="select-profile-row" class="form-select" style="padding: 3px 8px; font-size: 12px; width: 110px;"></select>
+              </div>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-profile-long"></canvas>
+            </div>
+          </div>
+
+          <!-- Perfil Transversal -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Perfil Transversal (Eje Y)</h3>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-size: 12px; color: var(--text-secondary);">Columna:</label>
+                <select id="select-profile-col" class="form-select" style="padding: 3px 8px; font-size: 12px; width: 110px;"></select>
+              </div>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-profile-trans"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2col" style="margin-top: 20px;">
+          <!-- Histograma de Diferencias de Cota -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Histograma de Frecuencia Altimétrica (Δh)</h3>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-histogram"></canvas>
+            </div>
+          </div>
+
+          <!-- Comparativa de Escenarios -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Volúmenes por Alternativa de Rasante</h3>
+            </div>
+            <div class="chart-box">
+              <canvas id="chart-scenarios-comp"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 5. VISTA: ESCENARIOS Y RASANTES ================= -->
+      <section class="view-section" id="view-escenarios">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Escenarios y Alternativas de Proyecto</h2>
+            <p class="page-subtitle">Evaluación multicriterio de diferentes cotas de rasante para minimizar movimiento de suelos</p>
+          </div>
+          <div>
+            <button class="btn btn-primary btn-sm" id="btn-add-scenario-modal">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Nueva Alternativa</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Tabla Comparativa de Alternativas</h3>
+          </div>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Alternativa</th>
+                  <th>Tipo / Criterio</th>
+                  <th>Vol. Corte (m³)</th>
+                  <th>Vol. Relleno (m³)</th>
+                  <th>Balance Neto (m³)</th>
+                  <th>Mov. Bruto (m³)</th>
+                  <th>Var. vs Base (%)</th>
+                  <th>Costo Estimado</th>
+                  <th style="text-align: right;">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="table-scenarios-body">
+                <!-- Llenado dinámicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Criterio Técnico y Recomendación -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              Criterio de Selección y Recomendaciones de Ingeniería Civil
+            </h3>
+          </div>
+          <div style="font-size: 13.5px; color: var(--text-secondary); line-height: 1.7;">
+            <p>
+              <strong>1. Balance de Masas Óptimo:</strong> La alternativa de <em>Rasante Compensada Óptima</em> minimiza el volumen neto ($V_{corte} \approx V_{relleno}$), lo que teóricamente elimina la necesidad de transporte a vertedero o aporte desde canteras de préstamo externas, reduciendo drásticamente las horas de maquinaria pesada.
+            </p>
+            <p style="margin-top: 10px;">
+              <strong>2. Condicionantes Reales de Proyecto:</strong> Aunque matemáticamente una rasante equilibrada parezca atractiva, el ingeniero civil debe verificar:
+            </p>
+            <ul style="padding-left: 24px; margin-top: 6px;">
+              <li><strong>Pendiente de Drenaje Pluvial:</strong> El escurrimiento superficial hacia cordones cuneta o zanjas requiere pendientes mínimas no menores al 0.5% - 1.0%.</li>
+              <li><strong>Nivel Freático:</strong> Excavar excesivamente en desmonte puede alcanzar el nivel freático o estratos colapsables.</li>
+              <li><strong>Empalme con Infraestructura Existente:</strong> Cotas de calzadas linderas, accesos y redes de saneamiento.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 6. VISTA: GESTOR DE PROYECTOS ================= -->
+      <section class="view-section" id="view-proyectos">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Gestión de Proyectos Topográficos</h2>
+            <p class="page-subtitle">Administración, respaldo en JSON, clonación y persistencia local</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" id="btn-import-project-json">
+              <span>Importar JSON</span>
+            </button>
+            <button class="btn btn-outline btn-sm" id="btn-export-project-json">
+              <span>Exportar JSON Activo</span>
+            </button>
+            <button class="btn btn-primary btn-sm" id="btn-create-new-project">
+              <span>+ Nuevo Proyecto</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Proyectos Almacenados en el Sistema</h3>
+            <span style="font-size: 12px; color: var(--text-muted);">Almacenamiento Local (LocalStorage)</span>
+          </div>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nombre del Proyecto</th>
+                  <th>Ubicación</th>
+                  <th>Modalidad</th>
+                  <th>Fecha</th>
+                  <th>Volumen Movido</th>
+                  <th>Balance</th>
+                  <th style="text-align: right;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="table-projects-body">
+                <!-- Llenado dinámico -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 7. VISTA: MEMORIA TÉCNICA E INFORMES ================= -->
+      <section class="view-section" id="view-informes">
+        <div class="page-header no-print">
+          <div>
+            <h2 class="page-title">Memoria Técnica de Cálculo Oficial</h2>
+            <p class="page-subtitle">Documento listo para presentación académica e institucional (UTN FRC - Libro Rojo CONFEDI)</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" id="btn-export-points-csv">
+              <span>Descargar CSV Puntos</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btn-export-volumes-csv">
+              <span>Descargar CSV Volúmenes</span>
+            </button>
+            <button class="btn btn-outline btn-sm" id="btn-export-dxf">
+              <span>Exportar CAD DXF</span>
+            </button>
+            <button class="btn btn-primary btn-sm" id="btn-print-report-now">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+              </svg>
+              <span>Imprimir / Guardar PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Documento de Memoria Técnica -->
+        <div id="technical-report-container">
+          <!-- Inyectado dinámicamente por ReportExporter -->
+        </div>
+      </section>
+
+      <!-- ================= 8. VISTA: VERIFICACIÓN Y PRUEBAS ================= -->
+      <section class="view-section" id="view-tests">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Suite de Verificación y Pruebas Unitarias</h2>
+            <p class="page-subtitle">Validación matemática y dimensional de los 6 casos exigidos en las especificaciones</p>
+          </div>
+          <div>
+            <button class="btn btn-primary btn-sm" id="btn-re-run-tests">
+              <span>Ejecutar Tests Nuevamente</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Resultados de Validación de Algoritmos</h3>
+            <span class="table-badge balance" id="tests-summary-badge">6 / 6 Casos Superados</span>
+          </div>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Caso de Prueba Exigido</th>
+                  <th>Estado</th>
+                  <th>Detalles de Verificación Numérica</th>
+                </tr>
+              </thead>
+              <tbody id="table-tests-body">
+                <!-- Llenado dinámico -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- ================= MODALES ================= -->
+
+<!-- Modal: Nuevo Proyecto -->
+<div class="modal-overlay" id="modal-new-project">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="card-title">Crear Nuevo Proyecto</h3>
+      <button class="btn btn-outline btn-sm close-modal">&times;</button>
+    </div>
+    <form id="form-new-project">
+      <div class="form-group">
+        <label class="form-label">Nombre del Proyecto</label>
+        <input type="text" class="form-input" id="new-proj-name" required placeholder="Ej: Urbanización Altos de Córdoba">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ubicación</label>
+        <input type="text" class="form-input" id="new-proj-location" placeholder="Ej: Córdoba, Argentina">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descripción</label>
+        <textarea class="form-textarea" id="new-proj-desc" rows="2" placeholder="Detalles de la obra, rasante o suelo..."></textarea>
+      </div>
+      <div class="grid-2col">
+        <div class="form-group">
+          <label class="form-label">Modalidad de Cálculo</label>
+          <select class="form-select" id="new-proj-mode">
+            <option value="advanced">Modo Avanzado (Malla de Puntos)</option>
+            <option value="simple">Modo Simple (Superficie Uniforme)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipo de Terreno Inicial</label>
+          <select class="form-select" id="new-proj-terrain">
+            <option value="rolling">Relieve Ondulado Serrano</option>
+            <option value="slope">Plataforma en Ladera</option>
+            <option value="basin">Depresión / Bajo Natural</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2col">
+        <div class="form-group">
+          <label class="form-label">Esponjamiento (%)</label>
+          <input type="number" class="form-input" id="new-proj-bulking" value="15">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Compactación (%)</label>
+          <input type="number" class="form-input" id="new-proj-shrinkage" value="10">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary close-modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Crear Proyecto</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Importar CSV -->
+<div class="modal-overlay" id="modal-import-csv">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="card-title">Importar Puntos Topográficos desde CSV</h3>
+      <button class="btn btn-outline btn-sm close-modal">&times;</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Seleccione archivo CSV</label>
+      <input type="file" id="input-csv-file" accept=".csv" class="form-input">
+      <p style="font-size: 11.5px; color: var(--text-muted); margin-top: 6px;">
+        Formato requerido con encabezados: <code>X, Y, Z_Natural, Z_Proyecto</code> (o <code>Z_Nat, Z_Proj</code>). Coordenadas en metros.
+      </p>
+    </div>
+    <div class="form-group">
+      <label class="form-label">O pegue el contenido CSV aquí:</label>
+      <textarea id="textarea-csv-paste" class="form-textarea font-mono" rows="6" placeholder="X,Y,Z_Nat,Z_Proj&#10;0,0,101.5,100.0&#10;5,0,102.0,100.0&#10;0,5,101.8,100.0&#10;5,5,102.3,100.0"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary close-modal">Cancelar</button>
+      <button type="button" class="btn btn-primary" id="btn-process-csv">Cargar Puntos</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Nueva Alternativa de Rasante -->
+<div class="modal-overlay" id="modal-new-scenario">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="card-title">Nueva Alternativa de Rasante</h3>
+      <button class="btn btn-outline btn-sm close-modal">&times;</button>
+    </div>
+    <form id="form-new-scenario">
+      <div class="form-group">
+        <label class="form-label">Nombre del Escenario</label>
+        <input type="text" class="form-input" id="scenario-name" required placeholder="Ej: Rasante Elevada +0.30 m">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Desplazamiento Vertical respecto a la Rasante Base (ΔZ)</label>
+        <div class="input-with-unit">
+          <input type="number" class="form-input" id="scenario-offset" value="0.30" step="0.05">
+          <span class="input-unit">m</span>
+        </div>
+        <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Valores positivos elevan la rasante (más terraplén / menos desmonte). Valores negativos la bajan.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary close-modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar Alternativa</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Renombrar Proyecto -->
+<div class="modal-overlay" id="modal-rename-project">
+  <div class="modal-content" style="max-width: 420px;">
+    <div class="modal-header">
+      <h3 class="card-title">Renombrar Proyecto</h3>
+      <button class="btn btn-outline btn-sm close-modal">&times;</button>
+    </div>
+    <form id="form-rename-project">
+      <input type="hidden" id="rename-proj-id">
+      <div class="form-group">
+        <label class="form-label">Nuevo Nombre del Proyecto</label>
+        <input type="text" class="form-input" id="rename-proj-name" required placeholder="Nombre de proyecto">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary close-modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar Nombre</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Editar Cota de Punto -->
+<div class="modal-overlay" id="modal-edit-point">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="card-title">Editar Cota de Punto Topográfico</h3>
+      <button class="btn btn-outline btn-sm close-modal">&times;</button>
+    </div>
+    <form id="form-edit-point">
+      <input type="hidden" id="edit-pt-id">
+      <div class="grid-2col">
+        <div class="form-group">
+          <label class="form-label">Coordenada X (m)</label>
+          <input type="number" class="form-input" id="edit-pt-x" step="0.1" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Coordenada Y (m)</label>
+          <input type="number" class="form-input" id="edit-pt-y" step="0.1" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cota Terreno Natural (Znat)</label>
+        <div class="input-with-unit">
+          <input type="number" class="form-input" id="edit-pt-znat" step="0.01" required>
+          <span class="input-unit">m</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cota Rasante de Proyecto (Zproj)</label>
+        <div class="input-with-unit">
+          <input type="number" class="form-input" id="edit-pt-zproj" step="0.01" required>
+          <span class="input-unit">m</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary close-modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Actualizar Cota</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Input oculto para importar JSON de proyecto -->
+<input type="file" id="input-json-import" accept=".json" style="display: none;">
+
+<!-- Input oculto para importar CSV directo en Calculadora -->
+<input type="file" id="input-direct-csv-calc" accept=".csv" style="display: none;">
+
+<!-- Contenedor de Notificaciones Toast -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Lógica de Control Principal de la Aplicación -->
+<script src="js/constants.js"></script>
+<script src="js/math-engine.js"></script>
+<script src="js/state.js"></script>
+<script src="js/viewer-2d.js"></script>
+<script src="js/viewer-3d.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
